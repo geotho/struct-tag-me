@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Struct-Tag-Me</title>
+    <style>
+      body {
+        font-family: Sans-Serif;
+      }
+
+      h1, h2, h3 {
+        margin: 16px 8px;
+      }
+
+      .col {
+        width: calc(50% - 16px);
+        float: left;
+        margin: 0 8px;
+      }
+
+      textarea {
+        width: 100%;
+        font-family: Courier New, Courier, monospace;
+        font-size: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <h1>One simple webpage to add JSON struct tags to your Go structs.</h1>
+      <h2>Dentists hate him!</h2>
+      <div class="col">
+        Paste your Go struct here:
+        <br>
+<textarea name="" id="input" rows="40" oninput="convert(this.value)">
+type Foo struct {
+  AThing            string
+  AnotherThing      int
+  AnotherOtherThing string
+}
+</textarea>
+      </div>
+      <div class="col">
+        Copy your structtagified struct here:
+        <br>
+        <textarea name="" id="tagified" rows="40"></textarea>
+      </div>
+    </div>
+    <script>
+
+      function convert(x) {
+        output(parse(x));
+      }
+
+      function output(val) {
+        const tagified = document.getElementById("tagified");
+        tagified.value = val;
+      }
+
+      function parse(lines) {
+        let parsed = "";
+
+        for (const line of lines.split("\n")) {
+          // console.log(`'${line}' -> '${parseProtobufLine(line)}'`);
+          parsed += parseLine(line);
+          parsed += "\n";
+        }
+        return parsed;
+      }
+
+      function parseLine(line) {
+        if (!line) {
+          return "";
+        }
+
+
+        const tokens = line.trim().split(" ").filter(Boolean);
+        switch (tokens[0]) {
+          case "//":
+          case "type":
+          case "}":
+            return line;
+        }
+
+        if (tokens.length > 2) {
+          return line;
+        }
+
+        const indent = line.length - line.trimLeft().length
+        const indentChar = line[0];
+
+        fieldName = tokens[0];
+        fieldName = fieldName.charAt(0).toLowerCase() + fieldName.substring(1);
+
+        return line + ' `json:' + fieldName + ',omitempty"`';
+      }
+
+      function getInput() {
+        return document.getElementById("input").value;
+      }
+
+      convert(getInput());
+    </script>
+  </body>
+</html>
